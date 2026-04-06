@@ -2,86 +2,91 @@
 
 ## Project Overview
 
-This project develops machine learning models to classify suicide risk from text data. It uses natural language processing (NLP) techniques to analyze social media posts and predict risk levels for mental health screening and intervention.
+This project develops machine learning models to classify suicide risk from text data (social media posts). It uses Natural Language Processing (NLP) techniques to predict risk levels for mental health screening and intervention.
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        PROJECT PIPELINE                              │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  ┌──────────────┐    ┌────────────────┐    ┌───────────────────┐    │
-│  │   Kaggle     │    │  Data Cleaning │    │  Feature          │    │
-│  │   Dataset    │───▶│  Pipeline      │───▶│  Engineering      │    │
-│  │  (232K rows) │    │                │    │                   │    │
-│  └──────────────┘    └────────────────┘    └───────────────────┘    │
-│                                                    │                │
-│         ┌─────────────────────────────────────────┼──────────┐     │
-│         │                                         │          │     │
-│         ▼                                         ▼          ▼     │
-│  ┌─────────────────┐              ┌──────────────────────────┐    │
-│  │ Sentiment        │              │ Risk Level               │    │
-│  │ Analysis         │              │ Classification           │    │
-│  │ (VADER/TextBlob) │              │ (Multi-class: 5 levels) │    │
-│  └─────────────────┘              └──────────────────────────┘    │
-│         │                                         │                │
-│         │                                         │                │
-│         └─────────────────────┬───────────────────┘                │
-│                               ▼                                    │
-│                    ┌─────────────────────┐                         │
-│                    │ Binary Classification │                         │
-│                    │ (Suicide/Non-Suicide) │                         │
-│                    │ Accuracy: 94%         │                         │
-│                    └─────────────────────┘                         │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           PROJECT PIPELINE                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌──────────────┐    ┌────────────────┐    ┌────────────────────────┐  │
+│  │   Kaggle     │    │  Data Cleaning │    │   Feature Engineering   │  │
+│  │   Dataset    │───▶│  Pipeline      │───▶│   (length, keywords,    │  │
+│  │  (232K rows) │    │                │    │    pronoun count)        │  │
+│  └──────────────┘    └────────────────┘    └────────────────────────┘  │
+│                                                     │                   │
+│         ┌───────────────────────────────────────────┼───────────────┐   │
+│         │                                           │               │   │
+│         ▼                                           ▼               ▼   │
+│  ┌─────────────────┐              ┌────────────────────────────────┐  │
+│  │ Sentiment        │              │ Risk Level Multi-Class          │  │
+│  │ Analysis         │              │ Classification (5 levels)      │  │
+│  │ (VADER/TextBlob) │              │ minimal/low/mid/high/strong     │  │
+│  │ 79% accuracy     │              │ 85% accuracy                   │  │
+│  └─────────────────┘              └────────────────────────────────┘  │
+│         │                                           │                   │
+│         │                                           │                   │
+│         └─────────────────────┬─────────────────────┘                   │
+│                               ▼                                          │
+│                    ┌─────────────────────┐                              │
+│                    │ Binary Classification │                              │
+│                    │ (Suicide/Non-Suicide) │                              │
+│                    │    94% accuracy       │                              │
+│                    └─────────────────────┘                              │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Project Structure
 
 ```
 suicide-risk/
-├── docs/                           # Documentation
-│   ├── README.md                   # This file
-│   ├── data-cleaning.md           # Data cleaning pipeline
-│   ├── sentiment-analysis.md      # Sentiment feature extraction
-│   ├── demographic-analysis.md    # Demographic extraction
-│   ├── risk-level-classifier.md   # Multi-class risk levels
-│   ├── train-model.md             # Model training
-│   └── download-dataset.md        # Dataset acquisition
+├── docs/                                   # Documentation
+│   ├── README.md                          # This file - Project overview
+│   ├── data-cleaning.md                   # Data preprocessing pipeline
+│   ├── sentiment-analysis.md              # Sentiment feature extraction
+│   ├── demographic-analysis.md             # Demographics extraction
+│   ├── risk-level-classifier.md           # Multi-class risk levels (5 levels)
+│   ├── train-model.md                     # Binary classification model
+│   ├── download-dataset.md                # Dataset acquisition
+│   └── model-usage.md                     # API & usage examples
 │
-├── suicide-watch/                  # Dataset folder
-│   ├── Suicide_Detection.csv      # Original raw data
-│   ├── suicide_watch_cleaned.csv  # Cleaned data
-│   ├── suicide_watch_backup.csv   # Backup before modifications
-│   ├── suicide_watch_with_sentiment.csv
-│   ├── suicide_watch_with_demographics.csv
-│   └── suicide_watch_with_risk_levels.csv
+├── suicide-watch/                         # Dataset folder
+│   ├── Suicide_Detection.csv              # Original raw data (~167MB)
+│   ├── suicide_watch_cleaned.csv          # Cleaned data
+│   ├── suicide_watch_backup.csv           # Backup before modifications
+│   ├── suicide_watch_with_sentiment.csv   # + Sentiment features
+│   ├── suicide_watch_with_demographics.csv # + Demographics
+│   └── suicide_watch_with_risk_levels.csv # + Risk levels
 │
-├── models/                         # Trained models
-│   ├── logistic_model.pkl          # Binary classifier
-│   ├── tfidf_vectorizer.pkl       # TF-IDF transformer
-│   ├── risk_level_classifier.pkl   # Multi-class classifier
-│   └── risk_vectorizer.pkl        # Risk model vectorizer
+├── models/                                # Trained models (pickle files)
+│   ├── logistic_model.pkl                 # Binary classifier (94% accuracy)
+│   ├── tfidf_vectorizer.pkl              # TF-IDF for binary model
+│   ├── risk_level_classifier.pkl          # Multi-class classifier (85% accuracy)
+│   └── risk_vectorizer.pkl               # TF-IDF for risk model
 │
-├── venv/                           # Virtual environment
+├── venv/                                  # Python virtual environment
 │
-├── data-cleaning.ipynb            # Data preprocessing
-├── sentiment_analysis.ipynb        # Sentiment features
-├── demographic_analysis.ipynb     # Demographics extraction
-├── risk_level_classifier.ipynb    # Risk level classification
-├── train.ipynb                    # Binary model training
-├── download_dataset.py            # Dataset downloader
-└── requirements.txt               # Python dependencies
+├── data-cleaning.ipynb                   # Step 1: Data preprocessing
+├── sentiment_analysis.ipynb               # Step 2: Sentiment analysis
+├── demographic_analysis.ipynb            # Step 3: Demographics extraction
+├── risk_level_classifier.ipynb           # Step 4: Multi-class risk levels
+├── train.ipynb                           # Step 5: Binary classification
+├── download_dataset.py                   # Dataset downloader
+├── requirements.txt                      # Python dependencies
+└── README.md                             # This file
 ```
 
 ## Quick Start
 
 ### 1. Setup Environment
 ```bash
-# Create and activate virtual environment
+# Create virtual environment
 python -m venv venv
+
+# Activate
 venv\Scripts\activate  # Windows
 # source venv/bin/activate  # Linux/Mac
 
@@ -99,101 +104,102 @@ python download_dataset.py
 jupyter notebook
 ```
 
-**Recommended Order**:
+**Recommended Execution Order**:
 1. `data-cleaning.ipynb` - Clean and prepare data
 2. `sentiment_analysis.ipynb` - Add sentiment features
 3. `demographic_analysis.ipynb` - Extract demographics
-4. `risk_level_classifier.ipynb` - Create risk levels
+4. `risk_level_classifier.ipynb` - Create 5-level risk classification
 5. `train.ipynb` - Train binary classifier
 
-## Features Overview
+## What Each Notebook Does
 
-### 1. Data Cleaning (`data-cleaning.ipynb`)
-- Text normalization (lowercase, remove URLs, special chars)
-- Feature engineering (length, keyword scores, pronoun count)
-- Label encoding (suicide/non-suicide → 0/1)
+### 1. data-cleaning.ipynb
+**Purpose**: Clean raw text and engineer features
 
-### 2. Sentiment Analysis (`sentiment_analysis.ipynb`)
-- **VADER**: Social media optimized sentiment
-- **TextBlob**: General-purpose polarity/subjectivity
-- **Result**: 6 new sentiment features per post
+**What it does**:
+- Loads raw CSV from Kaggle
+- Removes URLs, special characters
+- Creates features: length, risk_score, pronoun_count
+- Outputs: `suicide_watch_cleaned.csv`
 
-### 3. Demographic Analysis (`demographic_analysis.ipynb`)
-- **Age extraction**: Regex patterns for "I'm 16", "16 yo"
-- **Gender detection**: Pronoun-based classification
-- **Reason extraction**: 11 categories (depression, family, work, etc.)
-- **External comparison**: WHO/CDC statistics
+### 2. sentiment_analysis.ipynb
+**Purpose**: Add emotional tone features
 
-### 4. Risk Classification (`risk_level_classifier.ipynb`)
-- **5 Risk Levels**: Minimal → Low → Mid → High → Strong
-- **Keyword-based scoring**: 30+ risk indicators
-- **Multi-class models**: Random Forest, Logistic Regression
+**What it does**:
+- Applies VADER sentiment analysis
+- Applies TextBlob sentiment analysis
+- Creates 6 new features per post
+- Trains Random Forest with 79% accuracy
+- Outputs: `suicide_watch_with_sentiment.csv`
 
-### 5. Binary Classification (`train.ipynb`)
-- **Model**: Logistic Regression + TF-IDF
-- **Accuracy**: 94%
-- **Purpose**: Production screening model
+### 3. demographic_analysis.ipynb
+**Purpose**: Extract demographic information
 
-## Model Performance
+**What it does**:
+- Extracts age using regex patterns
+- Detects gender using pronouns
+- Identifies reasons (depression, family, work, etc.)
+- Compares with WHO/CDC statistics
+- Outputs: `suicide_watch_with_demographics.csv`
 
-| Model | Task | Classes | Accuracy | Best For |
+### 4. risk_level_classifier.ipynb
+**Purpose**: Multi-class risk classification
+
+**What it does**:
+- Classifies into 5 risk levels: minimal/low/mid/high/strong
+- Uses keyword-based scoring + ML
+- Trains Logistic Regression (85%) and Random Forest (84%)
+- Outputs: `suicide_watch_with_risk_levels.csv`
+
+### 5. train.ipynb
+**Purpose**: Binary classification for production
+
+**What it does**:
+- Trains Logistic Regression with TF-IDF
+- Achieves 94% accuracy
+- Saves models for deployment
+- Outputs: `models/logistic_model.pkl`
+
+## Model Performance Comparison
+
+| Model | Type | Classes | Accuracy | Use Case |
 |-------|------|---------|----------|----------|
-| Logistic Regression | Binary | 2 | 94% | Production deployment |
-| Random Forest | Risk Levels | 5 | ~80% | Triage systems |
-| Sentiment + RF | Binary | 2 | 79% | Explainability |
+| `train.ipynb` | Logistic Regression | Binary (2) | **94%** | Production screening |
+| `risk_level_classifier.ipynb` | Logistic Regression | Multi-class (5) | **85%** | Triage & intervention |
+| `sentiment_analysis.ipynb` | Random Forest | Binary (2) | **79%** | Explainability |
 
-## Key Findings
+## Risk Level Definitions
 
-### Dataset Characteristics
-- **232,074 posts** (perfectly balanced 50/50)
-- Average length: Suicide posts 3x longer
-- Mean age: 21.5 years (skews young)
+| Level | Label | Description | Action |
+|-------|-------|-------------|--------|
+| 0 | MINIMAL | No risk indicators | Standard response |
+| 1 | LOW | Mild distress | Monitor, follow-up |
+| 2 | MID | Moderate risk | Professional review |
+| 3 | HIGH | High risk | Urgent intervention |
+| 4 | STRONG | Critical | Emergency response |
 
-### Sentiment Patterns
+## Key Findings from Data
+
+### Dataset Statistics
+- **Total Posts**: 232,074 (perfectly balanced)
+- **Suicide Posts**: 116,037 (50%)
+- **Non-Suicide Posts**: 116,037 (50%)
+
+### Text Length
+- Suicide posts: ~1050 characters (average)
+- Non-suicide posts: ~329 characters (average)
+- **Insight**: Suicide posts are 3x longer
+
+### Sentiment Analysis
 - Suicide posts: **73% negative** sentiment
 - Non-suicide posts: **51% positive** sentiment
-- Compound score: -0.44 vs +0.09
 
-### Top Risk Factors
-1. Family issues (26.2%)
+### Top Risk Factors (from actual data)
+1. Family issues (26.1%)
 2. Work stress (18.4%)
 3. Depression (12.0%)
 4. Relationship problems (11.0%)
-5. Financial stress (10.4%)
-
-## Applications
-
-### 1. Mental Health Screening
-```
-User Post → Model → Risk Level → Action
-                                ↓
-              ┌─────────────────┼─────────────────┐
-              │                 │                 │
-           Minimal           High/Strong        Mid
-              │                 │                 │
-         Standard         Immediate          Urgent
-         Check-in         Response          Screening
-```
-
-### 2. Crisis Hotline Integration
-- Real-time scoring of incoming messages
-- Priority routing based on risk level
-- Automated responses for lower risk
-
-### 3. Research & Analysis
-- Trend analysis by demographics
-- Geographic/demographic risk patterns
-- Intervention effectiveness tracking
-
-## Ethical Considerations
-
-⚠️ **Important**: This tool is a screening aid, not a diagnostic tool.
-
-1. **Human Oversight**: All high-risk predictions should involve human review
-2. **Privacy**: Handle mental health data with extreme care
-3. **Bias**: Models may reflect societal biases in training data
-4. **Consent**: Ensure appropriate consent for data use
-5. **Fallback**: Always have escalation paths
+5. Financial stress (10.5%)
 
 ## Dependencies
 
@@ -212,13 +218,30 @@ kagglehub>=0.1.0
 jupyter>=1.0.0
 ```
 
-## License & Ethics
+## Applications
 
-This project is for **research and educational purposes**. 
+### 1. Mental Health Screening
+Automated detection of at-risk content for human review.
 
-- Dataset is from public Reddit posts (anonymized)
-- Do not use for actual clinical diagnosis
-- Mental health decisions should always involve qualified professionals
+### 2. Crisis Response Triage
+Prioritize emergency response based on risk level.
+
+### 3. Resource Allocation
+Focus limited mental health resources on highest-risk cases.
+
+### 4. Research & Analysis
+Study patterns in suicide-related content.
+
+## Ethical Considerations
+
+⚠️ **IMPORTANT**: This is a screening tool, NOT a diagnostic tool.
+
+1. **Human Oversight**: All high-risk predictions require human review
+2. **Privacy**: Handle mental health data with extreme care
+3. **Bias**: Models may reflect societal biases
+4. **Consent**: Ensure appropriate consent for data use
+5. **Fallback**: Always have escalation paths for edge cases
+6. **Limitations**: Cannot fully understand context or nuance
 
 ## Further Improvements
 
@@ -228,13 +251,25 @@ This project is for **research and educational purposes**.
 4. **Active Learning**: Human-in-the-loop for edge cases
 5. **API Deployment**: RESTful service for real-time inference
 
-## Contact & Support
+## Documentation
 
-For questions about this project:
-- Review documentation in `/docs` folder
-- Check notebook comments for code explanations
-- Examine output visualizations for insights
+All detailed documentation is in the `/docs` folder:
+- Start with `README.md` (this file)
+- `data-cleaning.md` - Pipeline explanation
+- `sentiment-analysis.md` - VADER/TextBlob features
+- `demographic-analysis.md` - Demographics extraction
+- `risk-level-classifier.md` - 5-level risk classification
+- `train-model.md` - Binary model training
+- `model-usage.md` - API & deployment examples
+
+## License & Ethics
+
+This project is for **research and educational purposes**.
+
+- Dataset is from public Reddit posts (anonymized)
+- Do not use for actual clinical diagnosis
+- Mental health decisions should always involve qualified professionals
 
 ---
 
-**Remember**: This is a screening tool. Always prioritize human judgment and professional mental health expertise.
+**Remember**: This tool assists screening. Always prioritize human judgment and professional mental health expertise.

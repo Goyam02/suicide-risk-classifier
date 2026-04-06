@@ -1,72 +1,71 @@
-# Model Inference API
+# Model Inference Guide
 
-## Quick Start
+## Overview
+This guide explains how to load and use the trained models for prediction.
 
-### Loading Models
+## Available Models
+
+### 1. Binary Classification Model
+| File | Description |
+|------|-------------|
+| `models/logistic_model.pkl` | Logistic Regression classifier |
+| `models/tfidf_vectorizer.pkl` | TF-IDF vectorizer |
+
+**Accuracy**: 94%
+**Output**: 0 (non-suicide) or 1 (suicide)
+
+### 2. Risk Level Model
+| File | Description |
+|------|-------------|
+| `models/risk_level_classifier.pkl` | Random Forest classifier |
+| `models/risk_vectorizer.pkl` | TF-IDF vectorizer with bigrams |
+
+**Accuracy**: 85%
+**Output**: 0 (minimal), 1 (low), 2 (mid), 3 (high), 4 (strong)
+
+## Loading Models
 
 ```python
 import joblib
 
-# Binary classification model
+# Binary classification
 binary_model = joblib.load("models/logistic_model.pkl")
 binary_vectorizer = joblib.load("models/tfidf_vectorizer.pkl")
 
-# Risk level classifier
+# Risk level classification
 risk_model = joblib.load("models/risk_level_classifier.pkl")
 risk_vectorizer = joblib.load("models/risk_vectorizer.pkl")
 ```
 
-## Binary Classification
+## Binary Classification Usage
 
-### Basic Usage
-
+### Single Prediction
 ```python
 def predict_suicide_risk(text):
-    """
-    Predict if a post indicates suicide risk.
-    
-    Args:
-        text: String - The post text to analyze
-        
-    Returns:
-        int: 1 for suicide risk, 0 for no risk
-    """
     vec = binary_vectorizer.transform([text])
-    pred = binary_model.predict(vec)
+    pred = binary_model.predict(vec)[0]
     prob = binary_model.predict_proba(vec)[0][1]
-    return pred[0], prob
+    return pred, prob
 
 # Example
 text = "I feel like there's no point in living anymore"
 prediction, confidence = predict_suicide_risk(text)
-print(f"Risk: {'Yes' if prediction == 1 else 'No'}, Confidence: {confidence:.2%}")
+print(f"Risk: {'Yes' if prediction == 1 else 'No'}")
+print(f"Confidence: {confidence:.2%}")
 ```
 
-### Batch Processing
-
+### Batch Prediction
 ```python
 def batch_predict(texts):
-    """Predict risk for multiple texts."""
     vectors = binary_vectorizer.transform(texts)
     predictions = binary_model.predict(vectors)
     probabilities = binary_model.predict_proba(vectors)
     return predictions, probabilities
-
-# Example
-posts = [
-    "Had a great day with friends!",
-    "Feeling really down and hopeless",
-    "Work was stressful but manageable"
-]
-preds, probs = batch_predict(posts)
-for post, pred, prob in zip(posts, preds, probs):
-    print(f"'{post[:30]}...' -> Risk: {pred}, Confidence: {prob[1]:.2%}")
 ```
 
-## Risk Level Classification
+## Risk Level Classification Usage
 
-### Basic Usage
-
+### Risk Level Mapping
 ```python
 RISK_LEVELS = {
     0: 'minimal',
@@ -76,33 +75,14 @@ RISK_LEVELS = {
     4: 'strong'
 }
 
-def predict_risk_level(text):
-    """
-    Classify the risk level of a post.
-    
-    Returns:
-        tuple: (level_name, level_score)
-    """
-    vec = risk_vectorizer.transform([text])
-    pred = risk_model.predict(vec)[0]
-    return RISK_LEVELS[pred], pred
+RISK_DESCRIPTIONS = {
+    'minimal': 'No risk indicators',
+    'low': 'Mild distress, monitor',
+    'mid': 'Moderate risk, professional review needed',
+    'high': 'High risk, urgent intervention',
+    'strong': 'Critical, emergency response'
+}
 
-# Example
-texts = [
-    "Today was a good day!",
-    "Feeling a bit sad lately",
-    "I think about ending my life sometimes",
-    "I want to kill myself, I have a plan"
-]
-
-for text in texts:
-    level, score = predict_risk_level(text)
-    print(f"'{text[:40]}...' -> {level.upper()} (score: {score})")
-```
-
-### Risk Level Actions
-
-```python
 RISK_ACTIONS = {
     'minimal': 'Standard check-in within 1 week',
     'low': 'Monitor and follow up within 3-5 days',
@@ -110,55 +90,43 @@ RISK_ACTIONS = {
     'high': 'Immediate intervention within 24 hours',
     'strong': 'CRITICAL - Emergency response required'
 }
+```
 
-def get_recommended_action(text):
-    """Get recommended action based on risk level."""
-    level, score = predict_risk_level(text)
-    action = RISK_ACTIONS[level]
-    return level, action
+### Single Prediction
+```python
+def predict_risk_level(text):
+    vec = risk_vectorizer.transform([text])
+    pred = risk_model.predict(vec)[0]
+    return RISK_LEVELS[pred], pred
 
 # Example
-text = "I'm tired of life and don't know how much longer I can go on"
-level, action = get_recommended_action(text)
+text = "I want to kill myself, I have a plan"
+level, score = predict_risk_level(text)
 print(f"Risk Level: {level.upper()}")
-print(f"Recommended Action: {action}")
+print(f"Action: {RISK_ACTIONS[level]}")
 ```
 
 ## Combined Analysis
 
 ```python
 def comprehensive_analysis(text):
-    """
-    Perform full analysis including all features.
-    
-    Returns dictionary with:
-    - binary_prediction
-    - risk_level
-    - recommended_action
-    - risk_score (probability)
-    """
     # Binary prediction
-    vec = binary_vectorizer.transform([text])
-    binary_pred = binary_model.predict(vec)[0]
-    binary_prob = binary_model.predict_proba(vec)[0][1]
+    bin_vec = binary_vectorizer.transform([text])
+    bin_pred = binary_model.predict(bin_vec)[0]
+    bin_prob = binary_model.predict_proba(bin_vec)[0][1]
     
     # Risk level
     risk_vec = risk_vectorizer.transform([text])
     risk_pred = risk_model.predict(risk_vec)[0]
     
-    # Compile results
     return {
         'text': text[:100] + '...' if len(text) > 100 else text,
-        'binary_prediction': 'Suicide Risk' if binary_pred == 1 else 'No Risk',
-        'confidence': f"{binary_prob:.1%}",
+        'binary_prediction': 'Suicide Risk' if bin_pred == 1 else 'No Risk',
+        'confidence': f"{bin_prob:.1%}",
         'risk_level': RISK_LEVELS[risk_pred].upper(),
+        'risk_score': risk_pred,
         'action_required': RISK_ACTIONS[RISK_LEVELS[risk_pred]]
     }
-
-# Example
-result = comprehensive_analysis("I've been thinking about suicide lately")
-for key, value in result.items():
-    print(f"{key}: {value}")
 ```
 
 ## Flask API Example
@@ -175,6 +143,15 @@ binary_vectorizer = joblib.load("models/tfidf_vectorizer.pkl")
 risk_model = joblib.load("models/risk_level_classifier.pkl")
 risk_vectorizer = joblib.load("models/risk_vectorizer.pkl")
 
+RISK_LEVELS = {0: 'minimal', 1: 'low', 2: 'mid', 3: 'high', 4: 'strong'}
+RISK_ACTIONS = {
+    'minimal': 'Standard check-in',
+    'low': 'Monitor',
+    'mid': 'Professional review',
+    'high': 'Urgent intervention',
+    'strong': 'Emergency response'
+}
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
     data = request.json
@@ -183,8 +160,20 @@ def analyze():
     if not text:
         return jsonify({'error': 'No text provided'}), 400
     
-    result = comprehensive_analysis(text)
-    return jsonify(result)
+    # Get predictions
+    bin_vec = binary_vectorizer.transform([text])
+    bin_pred = binary_model.predict(bin_vec)[0]
+    bin_prob = binary_model.predict_proba(bin_vec)[0][1]
+    
+    risk_vec = risk_vectorizer.transform([text])
+    risk_pred = risk_model.predict(risk_vec)[0]
+    
+    return jsonify({
+        'binary_prediction': 'Suicide Risk' if bin_pred == 1 else 'No Risk',
+        'confidence': f"{bin_prob:.1%}",
+        'risk_level': RISK_LEVELS[risk_pred].upper(),
+        'recommended_action': RISK_ACTIONS[RISK_LEVELS[risk_pred]]
+    })
 
 @app.route('/health', methods=['GET'])
 def health():
@@ -212,7 +201,6 @@ def main():
                         help='Model type to use')
     args = parser.parse_args()
     
-    # Load models
     if args.model == 'binary':
         model = joblib.load("models/logistic_model.pkl")
         vectorizer = joblib.load("models/tfidf_vectorizer.pkl")
@@ -237,9 +225,15 @@ if __name__ == '__main__':
 python cli.py "I want to end my life" --model risk
 ```
 
-## Model Limitations
+## Performance Notes
 
-### Always Remember
+| Operation | Speed |
+|-----------|-------|
+| Single prediction | ~10ms |
+| Batch (1,000 texts) | ~2 seconds |
+| Model loading | ~500ms |
+
+## Model Limitations
 
 ⚠️ **Important Warnings**:
 
@@ -249,7 +243,7 @@ python cli.py "I want to end my life" --model risk
 4. **Context Blindness**: Cannot understand full context
 5. **Human Review Required**: All predictions should be reviewed
 
-### Recommended Thresholds
+## Recommended Thresholds
 
 ```python
 # For high-stakes decisions
@@ -269,17 +263,9 @@ def safe_prediction(text):
         return 'LOW_RISK', prob
 ```
 
-## Performance Notes
-
-| Operation | Speed |
-|-----------|-------|
-| Single prediction | ~10ms |
-| Batch (1000 texts) | ~2 seconds |
-| Model loading | ~500ms |
-
 ## Model Versioning
 
-Current models are trained on:
-- Dataset: `Suicide_Detection.csv` (232K rows)
-- Date: April 2026
-- Accuracy: 94% (binary), ~80% (multi-class)
+| Model | Dataset | Date | Accuracy |
+|-------|---------|------|----------|
+| Binary | 232K rows | April 2026 | 94% |
+| Risk Level | 232K rows | April 2026 | 85% |

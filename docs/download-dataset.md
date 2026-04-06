@@ -1,12 +1,13 @@
 # Dataset Download Script
 
 ## Overview
-This Python script downloads the suicide dataset from Kaggle using the `kagglehub` library.
+This Python script (`download_dataset.py`) downloads the suicide detection dataset from Kaggle using the `kagglehub` library.
 
 ## Purpose
-1. Automate dataset acquisition
-2. Ensure reproducible data sourcing
-3. Handle dataset versioning
+1. **Automate** dataset acquisition
+2. **Ensure reproducible** data sourcing
+3. **Handle** dataset versioning
+4. **Organize** data in project structure
 
 ## Dependencies
 ```python
@@ -19,38 +20,70 @@ import os
 - **Name**: `nikhileswarkomati/suicide-watch`
 - **Provider**: Kaggle
 - **Content**: Reddit posts labeled as suicide-related or non-suicide
+- **Size**: ~167 MB
 
 ## How It Works
 
-### 1. Download from Kaggle
+### Step 1: Download from Kaggle
 ```python
 cache_path = kagglehub.dataset_download("nikhileswarkomati/suicide-watch")
 ```
 Downloads to Kaggle's default cache directory.
 
-### 2. Define Destination
+### Step 2: Define Project Location
 ```python
 project_root = os.getcwd()
 dataset_path = os.path.join(project_root, "suicide-watch")
 ```
 Sets target directory to project's `suicide-watch` folder.
 
-### 3. Move to Project
+### Step 3: Move to Project
 ```python
 if os.path.exists(dataset_path):
     shutil.rmtree(dataset_path)
 
 shutil.move(cache_path, dataset_path)
 ```
-- Removes old dataset if exists
-- Moves downloaded files to project
+- Removes old dataset if exists (prevents conflicts)
+- Moves downloaded files to project folder
 
-### 4. Output
-```
-Dataset moved to: D:\suicide-risk\suicide-watch
+### Step 4: Confirmation
+```python
+print("Dataset moved to:", dataset_path)
 ```
 
-## Dataset Structure
+## Usage
+
+### Running the Script
+```bash
+python download_dataset.py
+```
+
+### Prerequisites
+1. **Kaggle API Credentials** configured
+2. **Internet connection**
+3. **Sufficient disk space** (~200MB)
+
+### Setting Up Kaggle Credentials
+
+**Windows**:
+1. Install kaggle package: `pip install kaggle`
+2. Get credentials from https://www.kaggle.com/account
+3. Save to: `C:\Users\<your_username>\.kaggle\kaggle.json`
+
+**Linux/Mac**:
+1. Install kaggle package: `pip install kaggle`
+2. Get credentials from https://www.kaggle.com/account
+3. Save to: `~/.kaggle/kaggle.json`
+
+## Alternative: Manual Download
+
+If API access isn't configured:
+1. Visit: https://www.kaggle.com/datasets/nikhileswarkomati/suicide-watch
+2. Click "Download"
+3. Extract ZIP to `suicide-watch/` folder
+
+## Output Structure
 
 After download, the directory contains:
 ```
@@ -87,40 +120,13 @@ Unnamed: 0 | text                                                      | class
 
 **Class Balance**: Perfectly balanced (50/50 split)
 
-## Usage
-
-### Running the Script
-```bash
-python download_dataset.py
-```
-
-### Prerequisites
-1. Kaggle credentials configured (`~/.kaggle/kaggle.json`)
-2. Internet connection
-3. Sufficient disk space (~200MB)
-
-### Setting Up Kaggle Credentials
-```bash
-# Install kaggle package
-pip install kaggle
-
-# Download credentials from Kaggle website
-# Place at ~/.kaggle/kaggle.json (Linux/Mac) or C:\Users\<user>\.kaggle\kaggle.json (Windows)
-```
-
-## Alternative: Manual Download
-
-If API access isn't configured:
-1. Visit: https://www.kaggle.com/datasets/nikhileswarkomati/suicide-watch
-2. Click "Download"
-3. Extract to `suicide-watch/` folder
-
 ## Data Source Ethics
 
-This dataset is from public Reddit posts, posted before the API change in 2023. Consider:
+This dataset is from public Reddit posts, posted before the API change in 2023.
 
+Considerations:
 1. **Anonymization**: Usernames removed in dataset
-2. **Public Posts**: Data was publicly available
+2. **Public Posts**: Data was publicly available when collected
 3. **Research Purpose**: Intended for academic/research use
 4. **Sensitivity**: Contains mental health content - handle responsibly
 
@@ -129,6 +135,7 @@ This dataset is from public Reddit posts, posted before the API change in 2023. 
 - **Kagglehub** caches downloads - subsequent runs are faster
 - Dataset may be updated by author - check for new versions
 - If link breaks, search Kaggle for "suicide watch" dataset
+- Original dataset: https://www.kaggle.com/datasets/nikhileswarkomati/suicide-watch
 
 ## Related Files
 
