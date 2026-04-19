@@ -2,3 +2,4 @@ venv/
 models/
 suicide-watch/
 *.csv
+__pycache__
