@@ -1,0 +1,175 @@
+/* Base */
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: #cee1f1; 
+}
+
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.content {
+  width: 100%;
+  max-width: 900px;
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+}
+
+.header {
+  background: linear-gradient(135deg, #4f7cff, #5a8dee);
+  color: white;
+  text-align: center;
+  padding: 60px 20px 80px;
+  position: relative;
+}
+
+
+.header::before {
+  content: "";
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border: 20px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  top: -120px;
+  left: -120px;
+}
+
+.header::after {
+  content: "";
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  border: 20px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  bottom: -120px;
+  right: -100px;
+}
+
+
+.header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 56px;
+  margin: 0;
+}
+
+.header p {
+  margin-top: 10px;
+  opacity: 0.9;
+}
+
+
+.hero-img {
+  width: 140px;
+  margin-top: 20px;
+}
+
+
+.card {
+  background: white;
+  margin: -60px auto 0;   
+  width: 85%;
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
+.prompt {
+  color: #6b7280;
+}
+
+
+.textarea {
+  width: 95%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  background: #fafafa;
+  resize: none;
+  display: block;
+  margin: 0 auto; 
+}
+
+
+.button {
+  width: 35%;
+  padding: 14px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(90deg, #4f7cff, #7c7cf5);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+  display: block;
+  margin: 0 auto;
+}
+
+.button:hover {
+  opacity: 0.9;
+}
+
+.analysis {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+
+.badge {
+  align-self: flex-start;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.badge.medium {
+  background: #fde68a;
+  color: #92400e;
+}
+
+.summary {
+  background: #fff7ed;
+  padding: 16px;
+  border-radius: 16px;
+}
+
+.indicators {
+  background: #eef2ff;
+  padding: 16px;
+  border-radius: 16px;
+}
+
+.indicators ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+
+.back {
+  background: none;
+  border: none;
+  color: #4f7cff;
+  cursor: pointer;
+}
+
+.footer {
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+  padding: 20px;
+}
