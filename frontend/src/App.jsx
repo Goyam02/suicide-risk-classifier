@@ -1,10 +1,25 @@
 import React, { useState } from "react";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis } from "recharts";
 import "./App.css";
 
 export default function App() {
   const [text, setText] = useState("");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const pieData = [
+  { name: "Low", value: 25 },
+  { name: "Medium", value: 50 },
+  { name: "High", value: 25 },
+];
+
+const barData = [
+  { name: "Mood", value: 40 },
+  { name: "Stress", value: 70 },
+  { name: "Energy", value: 30 },
+];
+
+const COLORS = ["#86efac", "#fde68a", "#fca5a5"];
 
   const analyzeText = () => {
     if (!text.trim()) return;
@@ -57,6 +72,41 @@ export default function App() {
           <div className="analysis">
 
             <div className="badge medium">Medium Risk</div>
+
+            <div className="analysis-grid">
+
+  {/* PIE CHART */}
+  <div className="chart-card">
+    <h4>Risk Distribution</h4>
+    <PieChart width={180} height={180}>
+      <Pie data={pieData} dataKey="value" outerRadius={70}>
+        {pieData.map((entry, index) => (
+          <Cell key={index} fill={COLORS[index]} />
+        ))}
+      </Pie>
+    </PieChart>
+  </div>
+
+  {/* BAR CHART */}
+  <div className="chart-card">
+    <h4>Emotional Indicators</h4>
+    <BarChart width={220} height={150} data={barData}>
+      <XAxis dataKey="name" />
+      <YAxis hide />
+      <Bar dataKey="value" fill="#7c7cf5" radius={[6,6,0,0]} />
+    </BarChart>
+  </div>
+
+  {/* PROGRESS */}
+  <div className="chart-card">
+    <h4>Confidence</h4>
+    <div className="progress-bar">
+      <div className="progress-fill"></div>
+    </div>
+    <p>72% confidence</p>
+  </div>
+
+</div>
 
             <div className="summary">
               <h3>Summary</h3>
