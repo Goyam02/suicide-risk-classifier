@@ -1,14 +1,23 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import os
 
-from .models import load_models, predict_binary, predict_risk_level, comprehensive_analysis
+from .models import load_models, predict_binary, predict_risk_level, comprehensive_analysis, detailed_analysis
 
 app = FastAPI(
     title="Suicide Risk Classification API",
     description="API for suicide risk detection from text using ML models",
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 RISK_LEVELS = {
@@ -123,4 +132,28 @@ def root():
         "message": "Suicide Risk Classification API",
         "version": "1.0.0",
         "docs": "/docs"
+    }
+
+
+@app.post("/analyze/detailed")
+def analyze_detailed(request: AnalyzeRequest):
+    text = request.text.strip()
+    
+    if not text:
+        raise HTTPException(status_code=400, detail="Text cannot be empty")
+    
+    result = detailed_analysis(text)
+    
+    return {
+        "text": result["text"],
+        "text_length": result["text_length"],
+        "binary_prediction": result["binary_prediction"],
+        "confidence": result["confidence"],
+        "risk_level": result["risk_level"].upper(),
+        "risk_score": result["risk_score"],
+        "risk_description": result["risk_description"],
+        "action_required": result["action_required"],
+        "sentiment": result["sentiment"],
+        "emotional": result["emotional"],
+        "risk_distribution": result["risk_distribution"],
     }
